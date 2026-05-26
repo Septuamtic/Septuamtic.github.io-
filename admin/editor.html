@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>editor // blog</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- marked.js — markdown parser, no build step needed -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+  <style>
+    body { overflow: hidden; }
+
+    /* top bar */
+    .editor-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: rgba(13,13,13,0.96);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+      z-index: 200;
+      backdrop-filter: blur(6px);
+    }
+    .editor-bar-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .editor-bar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    .back-btn {
+      font-family: var(--font);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .back-btn:hover { color: var(--accent); opacity: 1; }
+
+    .title-input {
+      flex: 1;
+      background: none;
+      border: none;
+      border-bottom: 1px solid transparent;
+      color: var(--text-hi);
+      font-family: var(--font);
+      font-size: 0.9rem;
+      padding: 4px 0;
+      outline: none;
+      min-width: 0;
+      transition: border-color 0.15s;
+    }
+    .title-input:focus { border-bottom-color: var(--accent); }
+    .title-input::placeholder { color: var(--text-dim); }
+
+    .meta-input {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: var(--font);
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      outline: none;
+      width: 100px;
+      transition: border-color 0.15s;
+    }
+    .meta-input:focus { border-color: var(--accent); color: var(--text); }
+
+    .btn {
+      font-family: var(--font);
+      font-size: 0.75rem;
+      padding: 7px 14px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      border: 1px solid var(--border-hi);
+      background: none;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .btn-primary {
+      border-color: var(--accent);
+      color: #000;
+      background: var(--accent);
+    }
+    .btn-primary:hover { opacity: 0.85; color: #000; }
+
+    /* split pane layout */
+    .editor-layout {
+      position: fixed;
+      top: 52px; bottom: 0; left: 0; right: 0;
+      display: flex;
+    }
+
+    .pane {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    /* markdown pane */
+    .pane-md {
+      border-right: 1px solid var(--border);
+      background: var(--bg);
+    }
+    #md-input {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.88rem;
+      line-height: 1.8;
+      padding: 32px;
+      resize: none;
+      outline: none;
+      tab-size: 2;
+    }
+    #md-input::placeholder { color: var(--text-dim); }
+
+    /* preview pane */
+    .pane-preview {
+      background: var(--bg);
+    }
+    .preview-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    /* preview post styles */
+    .preview-inner h1 {
+      font-size: 1.5rem;
+      color: var(--text-hi);
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-inner h2 {
+      color: var(--text-hi);
+      font-size: 1rem;
+      margin: 2em 0 0.75em;
+      padding-left: 12px;
+      border-left: 2px solid var(--accent);
+    }
+    .preview-inner h3 {
+      color: var(--text-hi);
+      font-size: 0.9rem;
+      margin: 1.5em 0 0.5em;
+    }
+    .preview-inner p { margin-bottom: 1.3em; line-height: 1.85; }
+    .preview-inner a { color: var(--accent); }
+    .preview-inner blockquote {
+      border-left: 2px solid var(--border-hi);
+      padding-left: 16px;
+      color: var(--text-dim);
+      font-style: italic;
+      margin: 1.5em 0;
+    }
+    .preview-inner code {
+      background: #1a1a1a;
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: var(--radius);
+      font-size: 0.9em;
+    }
+    .preview-inner pre {
+      background: #1a1a1a;
+      border: 1px solid var(--border);
+      padding: 16px;
+      overflow-x: auto;
+      margin: 1.5em 0;
+      border-radius: var(--radius);
+    }
+    .preview-inner pre code { background: none; padding: 0; }
+    .preview-inner ul, .preview-inner ol {
+      padding-left: 20px;
+      margin-bottom: 1.3em;
+    }
+    .preview-inner li { margin-bottom: 0.4em; line-height: 1.75; }
+    .preview-inner hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2em 0;
+    }
+    .preview-inner img { max-width: 100%; border-radius: var(--radius); }
+
+    .preview-placeholder {
+      color: var(--text-dim);
+      font-size: 0.82rem;
+      margin-top: 48px;
+      text-align: center;
+    }
+
+    /* pane labels */
+    .pane-label {
+      position: sticky;
+      top: 0;
+      padding: 6px 32px;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+
+    /* status */
+    #status-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--bg-card);
+      border: 1px solid var(--border-hi);
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      color: var(--text);
+      transition: transform 0.25s ease;
+      z-index: 9000;
+      white-space: nowrap;
+    }
+    #status-bar.show { transform: translateX(-50%) translateY(0); }
+    #status-bar.ok  { border-color: var(--accent); color: var(--accent); }
+    #status-bar.err { border-color: #ff6b6b; color: #ff6b6b; }
+
+    .spinner {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border: 2px solid var(--border-hi);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* mobile: stack panes */
+    @media (max-width: 640px) {
+      .editor-layout { flex-direction: column; }
+      .pane-md { border-right: none; border-bottom: 1px solid var(--border); flex: 0 0 50%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="status-bar"></div>
+
+  <!-- TOP BAR -->
+  <div class="editor-bar">
+    <div class="editor-bar-left">
+      <a href="index.html" class="back-btn">← admin</a>
+      <input type="text" id="input-title" class="title-input" placeholder="post title..." />
+    </div>
+    <div class="editor-bar-right">
+      <input type="text" id="input-tag"  class="meta-input" placeholder="tag" style="width:80px" />
+      <input type="date" id="input-date" class="meta-input" style="width:130px" />
+      <button class="btn" id="btn-preview-toggle">preview only</button>
+      <button class="btn btn-primary" id="btn-publish">publish →</button>
+    </div>
+  </div>
+
+  <!-- EDITOR / PREVIEW SPLIT -->
+  <div class="editor-layout">
+    <div class="pane pane-md" id="pane-md">
+      <div class="pane-label">MARKDOWN</div>
+      <textarea id="md-input" placeholder="Write in markdown...
+
+# This becomes an h1
+## This becomes an h2
+
+Regular paragraph text.
+
+**bold**, *italic*, `code`
+
+> blockquote
+
+- list item
+- list item"></textarea>
+    </div>
+    <div class="pane pane-preview" id="pane-preview">
+      <div class="pane-label">PREVIEW</div>
+      <div class="preview-inner" id="preview-out">
+        <p class="preview-placeholder">start typing to see preview</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // =============================================
+  // HELPERS
+  // =============================================
+  const GH = 'https://api.github.com';
+
+  function creds() {
+    return {
+      user:  localStorage.getItem('gh_user'),
+      repo:  localStorage.getItem('gh_repo'),
+      token: localStorage.getItem('gh_token'),
+    };
+  }
+
+  function ghHeaders() {
+    return {
+      'Authorization': `token ${creds().token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+    };
+  }
+
+  async function ghGet(path) {
+    const { user, repo } = creds();
+    const r = await fetch(`${GH}/repos/${user}/${repo}/contents/${path}`, { headers: ghHeaders() });
+    if (!r.ok) throw new Error(`GitHub ${r.status}`);
+    return r.json();
+  }
+
+  async function ghPut(path, message, content, sha) {
+    const { user, repo } = creds();
+    const body = { message, content: btoa(unescape(encodeURIComponent(content))) };
+    if (sha) body.sha = sha;
+    const r = await fetch(`${GH}/repos/${user}/${repo}/contents/${path}`, {
+      method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error(`GitHub ${r.status}: ${await r.text()}`);
+    return r.json();
+  }
+
+  let statusTimer;
+  function showStatus(msg, type = 'ok', ms = 3500) {
+    const bar = document.getElementById('status-bar');
+    bar.innerHTML = msg;
+    bar.className = `show ${type}`;
+    clearTimeout(statusTimer);
+    if (ms > 0) statusTimer = setTimeout(() => bar.className = '', ms);
+  }
+
+  // =============================================
+  // MARKDOWN → HTML (using marked.js)
+  // =============================================
+  marked.setOptions({ breaks: true, gfm: true });
+
+  function mdToHtml(md) {
+    return marked.parse(md);
+  }
+
+  // =============================================
+  // SLUG FROM TITLE
+  // =============================================
+  function slugify(title) {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .substring(0, 60);
+  }
+
+  // =============================================
+  // EXCERPT: first ~160 chars of plain text
+  // =============================================
+  function excerpt(md) {
+    const plain = md
+      .replace(/#{1,6}\s+/g, '')
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/\*(.+?)\*/g, '$1')
+      .replace(/`(.+?)`/g, '$1')
+      .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+      .replace(/^>\s+/gm, '')
+      .replace(/\n+/g, ' ')
+      .trim();
+    return plain.length > 160 ? plain.substring(0, 157) + '...' : plain;
+  }
+
+  // =============================================
+  // BUILD FULL POST HTML
+  // =============================================
+  function buildPostHtml(title, tag, date, bodyHtml) {
+    const radioBlock = `
+  <div id="radio" class="radio collapsed">
+    <div class="radio-header" id="radio-toggle">
+      <span class="radio-signal">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </span>
+      <span class="radio-label">RADIO</span>
+      <span class="radio-chevron">▲</span>
+    </div>
+    <div class="radio-body">
+      <div class="radio-track-info">
+        <div class="track-name" id="track-name">no signal</div>
+        <div class="track-artist" id="track-artist">---</div>
+      </div>
+      <div class="radio-progress">
+        <div class="progress-bar" id="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-times">
+          <span id="time-current">0:00</span>
+          <span id="time-total">0:00</span>
+        </div>
+      </div>
+      <div class="radio-controls">
+        <button class="ctrl-btn" id="btn-prev">⏮</button>
+        <button class="ctrl-btn ctrl-play" id="btn-play">▶</button>
+        <button class="ctrl-btn" id="btn-next">⏭</button>
+        <button class="ctrl-btn ctrl-vol" id="btn-mute">🔊</button>
+        <input type="range" id="volume" min="0" max="1" step="0.05" value="0.7" class="vol-slider" />
+      </div>
+      <div class="radio-playlist" id="playlist"></div>
+    </div>
+    <audio id="audio-player" preload="metadata"></audio>
+  </div>`;
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${title} // blog</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+${radioBlock}
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="site-title">// your_name</a>
+      <nav class="site-nav">
+        <a href="../index.html" class="nav-link">posts</a>
+        <a href="../about.html" class="nav-link">about</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      <a href="../index.html" class="back-link">← back to posts</a>
+
+      <article class="post-full">
+        <header class="post-full-header">
+          <div class="post-meta">
+            <span class="post-date">${date}</span>
+            <span class="post-tag">${tag}</span>
+          </div>
+          <h1 class="post-full-title">${title}</h1>
+        </header>
+
+        <div class="post-full-body">
+${bodyHtml}
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>© ${new Date().getFullYear()} your_name</span>
+      <span class="footer-sep">//</span>
+      <span>built with static html & stubbornness</span>
+    </div>
+  </footer>
+
+  <script src="../js/radio.js"><\/script>
+</body>
+</html>`;
+  }
+
+  // =============================================
+  // INDEX.JSON HELPERS
+  // =============================================
+  async function getIndex() {
+    try {
+      const f = await ghGet('posts/index.json');
+      const data = JSON.parse(decodeURIComponent(escape(atob(f.content.replace(/\n/g,'')))));
+      return { posts: data.posts || [], sha: f.sha };
+    } catch(e) {
+      return { posts: [], sha: null };
+    }
+  }
+
+  async function saveIndex(posts, sha) {
+    return ghPut('posts/index.json', 'update post index', JSON.stringify({ posts }, null, 2), sha);
+  }
+
+  async function rebuildHomepage(posts) {
+    const f = await ghGet('index.html');
+    let html = decodeURIComponent(escape(atob(f.content.replace(/\n/g,''))));
+    const feedHtml = posts.length === 0
+      ? `        <!-- no posts yet -->`
+      : posts.map(p => `
+        <article class="post-card">
+          <div class="post-meta">
+            <span class="post-date">${p.date}</span>
+            <span class="post-tag">${p.tag}</span>
+          </div>
+          <h2 class="post-title">
+            <a href="posts/${p.slug}.html">${p.title}</a>
+          </h2>
+          <p class="post-excerpt">${p.excerpt}</p>
+          <a href="posts/${p.slug}.html" class="read-more">read more →</a>
+        </article>`).join('\n');
+
+    html = html.replace(
+      /(<section class="feed">)([\s\S]*?)(<\/section>)/,
+      `$1\n${feedHtml}\n\n      $3`
+    );
+    await ghPut('index.html', 'rebuild homepage', html, f.sha);
+  }
+
+  // =============================================
+  // PUBLISH
+  // =============================================
+  async function publish() {
+    if (!creds().token) { alert('not logged in — go to admin/index.html first'); return; }
+
+    const title = document.getElementById('input-title').value.trim();
+    const tag   = document.getElementById('input-tag').value.trim()  || 'misc';
+    const date  = document.getElementById('input-date').value        || new Date().toISOString().split('T')[0];
+    const md    = document.getElementById('md-input').value.trim();
+
+    if (!title) { showStatus('add a title first', 'err'); return; }
+    if (!md)    { showStatus('write something first', 'err'); return; }
+
+    const slug = editingSlug || slugify(title);
+    const bodyHtml = mdToHtml(md);
+    const postHtml = buildPostHtml(title, tag, date, bodyHtml);
+    const exc = excerpt(md);
+
+    const btn = document.getElementById('btn-publish');
+    btn.disabled = true;
+    showStatus('<span class="spinner"></span>publishing...', 'ok', -1);
+
+    try {
+      // 1. get existing file sha if editing
+      let existingSha = null;
+      if (editingSlug) {
+        try {
+          const existing = await ghGet(`posts/${slug}.html`);
+          existingSha = existing.sha;
+        } catch(e) { /* new file */ }
+      }
+
+      // 2. write post html
+      await ghPut(
+        `posts/${slug}.html`,
+        `${editingSlug ? 'update' : 'publish'} post: ${title}`,
+        postHtml,
+        existingSha
+      );
+
+      // 3. update index.json
+      const { posts, sha: idxSha } = await getIndex();
+      const existing = posts.findIndex(p => p.slug === slug);
+      const entry = { slug, title, date, tag, excerpt: exc };
+      if (existing >= 0) posts[existing] = entry;
+      else posts.unshift(entry);
+      await saveIndex(posts, idxSha);
+
+      // 4. rebuild homepage
+      await rebuildHomepage(posts);
+
+      showStatus(`published! live in ~60s`, 'ok');
+      editingSlug = slug; // now in edit mode
+      btn.textContent = 'update →';
+    } catch(e) {
+      showStatus(`error: ${e.message}`, 'err', 8000);
+    }
+    btn.disabled = false;
+  }
+
+  // =============================================
+  // LOAD EXISTING POST FOR EDITING
+  // =============================================
+  let editingSlug = null;
+  let editingMd   = '';
+
+  async function loadForEdit(slug) {
+    editingSlug = slug;
+    showStatus('<span class="spinner"></span>loading post...', 'ok', -1);
+    document.getElementById('btn-publish').textContent = 'update →';
+
+    try {
+      // Load the index to get metadata
+      const { posts } = await getIndex();
+      const meta = posts.find(p => p.slug === slug);
+      if (meta) {
+        document.getElementById('input-title').value = meta.title;
+        document.getElementById('input-tag').value   = meta.tag;
+        document.getElementById('input-date').value  = meta.date;
+      }
+
+      // We stored the post as HTML, so we need to extract the body HTML and
+      // put a note that the user is editing the HTML version (can't round-trip to MD perfectly)
+      // Instead, look for a stored .md source if we saved one
+      try {
+        const mdFile = await ghGet(`posts/${slug}.md`);
+        const mdContent = decodeURIComponent(escape(atob(mdFile.content.replace(/\n/g,''))));
+        document.getElementById('md-input').value = mdContent;
+        updatePreview();
+      } catch(e) {
+        // No .md source — extract body from HTML as fallback hint
+        const htmlFile = await ghGet(`posts/${slug}.html`);
+        const html = decodeURIComponent(escape(atob(htmlFile.content.replace(/\n/g,''))));
+        // Extract the body between post-full-body div tags
+        const match = html.match(/<div class="post-full-body">([\s\S]*?)<\/div>\s*<\/article>/);
+        if (match) {
+          document.getElementById('md-input').value =
+            `<!-- note: original markdown not found; editing from HTML source -->\n\n` +
+            match[1].trim();
+        }
+        updatePreview();
+      }
+
+      showStatus('loaded — edit away', 'ok');
+    } catch(e) {
+      showStatus(`could not load: ${e.message}`, 'err', 6000);
+    }
+  }
+
+  // =============================================
+  // SAVE MARKDOWN SOURCE alongside HTML
+  // Override ghPut in publish to also save .md
+  // =============================================
+  const _origPublish = publish;
+
+  // =============================================
+  // PREVIEW
+  // =============================================
+  function updatePreview() {
+    const md = document.getElementById('md-input').value;
+    const out = document.getElementById('preview-out');
+    if (!md.trim()) {
+      out.innerHTML = '<p class="preview-placeholder">start typing to see preview</p>';
+      return;
+    }
+    const title = document.getElementById('input-title').value.trim();
+    out.innerHTML = (title ? `<h1>${title}</h1>` : '') + mdToHtml(md);
+  }
+
+  // preview only / split toggle
+  let previewOnly = false;
+  document.getElementById('btn-preview-toggle').addEventListener('click', () => {
+    previewOnly = !previewOnly;
+    document.getElementById('pane-md').style.display = previewOnly ? 'none' : '';
+    document.getElementById('btn-preview-toggle').textContent = previewOnly ? 'split view' : 'preview only';
+  });
+
+  document.getElementById('md-input').addEventListener('input', updatePreview);
+  document.getElementById('input-title').addEventListener('input', updatePreview);
+
+  // =============================================
+  // INIT
+  // =============================================
+  // Set today's date as default
+  document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
+
+  // check for ?slug= param
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('slug')) {
+    if (!creds().token) {
+      window.location.href = 'index.html';
+    } else {
+      loadForEdit(params.get('slug'));
+    }
+  } else if (!creds().token) {
+    window.location.href = 'index.html';
+  }
+
+  document.getElementById('btn-publish').addEventListener('click', async () => {
+    const slug = editingSlug || slugify(document.getElementById('input-title').value.trim());
+    const md   = document.getElementById('md-input').value.trim();
+
+    // Also save .md source so we can round-trip on edit
+    if (slug && md) {
+      try {
+        let mdSha = null;
+        try {
+          const existing = await ghGet(`posts/${slug}.md`);
+          mdSha = existing.sha;
+        } catch(e) {}
+        await ghPut(`posts/${slug}.md`, `save md source: ${slug}`, md, mdSha);
+      } catch(e) { /* non-fatal */ }
+    }
+    await publish();
+  });
+
+  // Keyboard shortcut: Cmd/Ctrl+S to publish
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      e.preventDefault();
+      document.getElementById('btn-publish').click();
+    }
+  });
+  </script>
+</body>
+</html>

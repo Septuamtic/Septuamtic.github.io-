@@ -1,6 +1,7 @@
 # // blog
 
-A minimal dark-theme blog with a built-in radio player. Pure HTML/CSS/JS — no frameworks, no build step, deploys directly to GitHub Pages.
+A minimal dark-theme blog with a built-in radio player and browser-based admin.
+Pure HTML/CSS/JS — no frameworks, no build step, deploys directly to GitHub Pages.
 
 ---
 
@@ -8,63 +9,88 @@ A minimal dark-theme blog with a built-in radio player. Pure HTML/CSS/JS — no 
 
 ```
 blog/
-├── index.html          ← post list (home page)
-├── about.html          ← about page
-├── css/
-│   └── style.css       ← all styles
-├── js/
-│   └── radio.js        ← radio player logic + PLAYLIST
-├── music/              ← put your .mp3 files here
-│   └── (your tracks)
+├── index.html              ← post list (managed by admin)
+├── about.html              ← about page
+├── admin/
+│   ├── index.html          ← post dashboard (list, delete)
+│   └── editor.html         ← markdown editor (create, edit)
+├── css/style.css
+├── js/radio.js             ← radio player + PLAYLIST config
+├── music/                  ← drop .mp3 files here
 └── posts/
-    ├── first-post.html
-    └── second-post.html
+    ├── index.json          ← post metadata (managed by admin)
+    ├── *.html              ← generated post files
+    └── *.md                ← markdown source files (for editing)
 ```
+
+---
+
+## Admin setup (one time)
+
+1. Go to https://github.com/settings/tokens/new
+   - Description: `blog-admin`
+   - Scope: check **repo**
+   - Click Generate, copy the token (you only see it once)
+
+2. Open `https://yourusername.github.io/admin/` in your browser
+
+3. Enter your GitHub username, repo name, and the token — click Connect
+
+Your token is stored only in your browser's localStorage. It never goes anywhere except GitHub's API.
+
+---
+
+## Writing posts
+
+1. Go to `/admin/` → click **+ new post**
+2. Write in markdown on the left, see the preview on the right
+3. Fill in the title, tag, and date at the top
+4. Click **publish →** (or press Cmd/Ctrl+S)
+
+The admin will:
+- Convert your markdown to a styled HTML post
+- Save a `.md` copy so you can edit it cleanly later
+- Update `posts/index.json`
+- Rebuild `index.html` automatically
+
+Your post goes live on GitHub Pages within ~60 seconds.
+
+---
+
+## Editing & deleting posts
+
+- **Edit**: `/admin/` → click **edit** next to any post → editor loads with the original markdown
+- **Delete**: `/admin/` → click **delete** → removes the file, updates the index, rebuilds homepage
 
 ---
 
 ## Adding music
 
-1. Drop your `.mp3` (or `.ogg`, `.wav`) files into the `/music/` folder.
-2. Open `js/radio.js` and edit the `PLAYLIST` array at the top:
+1. Drop `.mp3` / `.ogg` / `.wav` files into `/music/`
+2. Edit `js/radio.js` — update the `PLAYLIST` array at the top:
 
 ```js
 const PLAYLIST = [
-  { src: "music/my-song.mp3",       title: "My Song",       artist: "Artist Name" },
-  { src: "music/another-track.mp3", title: "Another Track", artist: "Someone Else" },
+  { src: "music/my-song.mp3", title: "My Song", artist: "Artist Name" },
 ];
 ```
 
-3. Save and push. Done.
-
-**Note on autoplay:** Browsers block autoplay until the user interacts with the page. The player will start automatically on the first click or keypress if it can't autoplay immediately.
+3. Push. Done.
 
 ---
 
-## Writing a new post
+## Deploy to GitHub Pages
 
-1. Duplicate `posts/first-post.html`.
-2. Update the `<title>`, `.post-date`, `.post-tag`, `.post-full-title`, and the body content.
-3. Add a card for it in `index.html` (copy one of the existing `<article class="post-card">` blocks).
-
----
-
-## Deploying to GitHub Pages
-
-1. Create a new GitHub repo (e.g. `yourusername.github.io` for a user site, or any name for a project site).
-2. Push this folder's contents to the repo's `main` branch.
-3. Go to **Settings → Pages → Source** and set it to `main` / `root`.
-4. Your site will be live at `https://yourusername.github.io` (or `.../repo-name` for a project site).
+1. Create a GitHub repo (name it `yourusername.github.io` for a root site)
+2. Push this folder's contents to `main`
+3. **Settings → Pages → Source: main / root**
+4. Live in ~1 minute at `https://yourusername.github.io`
 
 ---
 
-## Customisation
+## Customise
 
-- **Accent color:** Change `--accent` in `css/style.css` (currently terminal green `#7fff7f`).
-- **Site name:** Replace `// your_name` in all HTML files.
-- **Font:** Change `--font` in `:root` — it's `Courier New` by default. Any monospace works.
-- **Scanline texture:** Remove the `background-image` on `body` in `style.css` if you don't want it.
-
----
-
-No dependencies. No build step. Just files.
+- **Accent colour**: change `--accent` in `css/style.css` (default: terminal green `#7fff7f`)
+- **Site name**: find/replace `your_name` across all HTML files
+- **Font**: change `--font` in `:root` — any monospace works
+- **Scanline texture**: remove `background-image` on `body` in `style.css`

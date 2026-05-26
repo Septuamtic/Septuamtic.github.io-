@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>admin // blog</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    /* ---- admin-specific overrides ---- */
+    .admin-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 120px;
+    }
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-title {
+      font-size: 1rem;
+      color: var(--text-hi);
+      letter-spacing: 0.05em;
+    }
+    .admin-actions { display: flex; gap: 10px; align-items: center; }
+
+    /* login screen */
+    #login-screen {
+      max-width: 420px;
+      margin: 80px auto;
+      padding: 32px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+    }
+    #login-screen h2 {
+      font-size: 0.9rem;
+      color: var(--text-hi);
+      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+    }
+    #login-screen p {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    #login-screen p a { font-size: inherit; }
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+      letter-spacing: 0.06em;
+    }
+    .field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border-hi);
+      color: var(--text-hi);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      padding: 9px 12px;
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: var(--accent); }
+    .login-error {
+      font-size: 0.75rem;
+      color: #ff6b6b;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    /* buttons */
+    .btn {
+      font-family: var(--font);
+      font-size: 0.78rem;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      border: 1px solid var(--border-hi);
+      background: none;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      transition: all 0.15s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary {
+      border-color: var(--accent);
+      color: #000;
+      background: var(--accent);
+    }
+    .btn-primary:hover { opacity: 0.85; color: #000; border-color: var(--accent); }
+    .btn-danger { border-color: #6b2222; color: #ff6b6b; }
+    .btn-danger:hover { background: #ff6b6b; color: #000; border-color: #ff6b6b; }
+    .btn-sm { padding: 5px 10px; font-size: 0.72rem; }
+    .btn-full { width: 100%; }
+
+    /* post list */
+    .post-list { display: flex; flex-direction: column; gap: 0; }
+    .post-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .post-row:first-child { border-top: 1px solid var(--border); }
+    .post-row-info { flex: 1; min-width: 0; }
+    .post-row-title {
+      font-size: 0.9rem;
+      color: var(--text-hi);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .post-row-meta {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 3px;
+    }
+    .post-row-meta .tag {
+      color: var(--accent-dim);
+      border: 1px solid var(--accent-dim);
+      padding: 0 5px;
+      border-radius: var(--radius);
+      margin-left: 6px;
+    }
+    .post-row-btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 0;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+    .empty-state a { font-size: inherit; }
+
+    /* status bar */
+    #status-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--bg-card);
+      border: 1px solid var(--border-hi);
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      color: var(--text);
+      transition: transform 0.25s ease;
+      z-index: 9000;
+      white-space: nowrap;
+    }
+    #status-bar.show { transform: translateX(-50%) translateY(0); }
+    #status-bar.ok  { border-color: var(--accent); color: var(--accent); }
+    #status-bar.err { border-color: #ff6b6b; color: #ff6b6b; }
+
+    /* confirm modal */
+    .modal-bg {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 8000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-bg.show { display: flex; }
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-hi);
+      padding: 28px;
+      border-radius: var(--radius);
+      max-width: 380px;
+      width: 90%;
+    }
+    .modal h3 { font-size: 0.9rem; color: var(--text-hi); margin-bottom: 10px; }
+    .modal p  { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 24px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* logout link */
+    .logout-btn {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font);
+      text-decoration: underline;
+      padding: 0;
+    }
+    .logout-btn:hover { color: #ff6b6b; }
+
+    .spinner {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border: 2px solid var(--border-hi);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- STATUS BAR -->
+  <div id="status-bar"></div>
+
+  <!-- CONFIRM MODAL -->
+  <div class="modal-bg" id="confirm-modal">
+    <div class="modal">
+      <h3 id="modal-title">delete post?</h3>
+      <p id="modal-body">This will permanently delete the post and remove it from the index. Are you sure?</p>
+      <div class="modal-btns">
+        <button class="btn btn-sm" id="modal-cancel">cancel</button>
+        <button class="btn btn-sm btn-danger" id="modal-confirm">delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen" style="display:none">
+    <h2>// admin login</h2>
+    <p>
+      Enter your GitHub Personal Access Token.<br>
+      Needs <strong>repo</strong> scope.
+      <a href="https://github.com/settings/tokens/new?description=blog-admin&scopes=repo" target="_blank">Create one here ↗</a>
+    </p>
+    <div class="field">
+      <label>GITHUB USERNAME</label>
+      <input type="text" id="input-user" placeholder="yourusername" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>REPO NAME</label>
+      <input type="text" id="input-repo" placeholder="yourusername.github.io" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label>PERSONAL ACCESS TOKEN</label>
+      <input type="password" id="input-token" placeholder="ghp_••••••••••••••••••••••" autocomplete="off" />
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <button class="btn btn-primary btn-full" id="btn-login">connect to github →</button>
+  </div>
+
+  <!-- ADMIN DASHBOARD -->
+  <div id="admin-screen" style="display:none">
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="../index.html" class="site-title">// your_name</a>
+        <nav class="site-nav">
+          <a href="../index.html" class="nav-link">← site</a>
+          <button class="logout-btn" id="btn-logout">logout</button>
+        </nav>
+      </div>
+    </header>
+
+    <div class="admin-wrap">
+      <div class="admin-header">
+        <span class="admin-title">// posts</span>
+        <div class="admin-actions">
+          <button class="btn" id="btn-refresh">↻ refresh</button>
+          <a href="editor.html" class="btn btn-primary">+ new post</a>
+        </div>
+      </div>
+
+      <div id="post-list-wrap">
+        <div class="empty-state">
+          <span class="spinner"></span> loading posts...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // =============================================
+  // GITHUB API HELPERS
+  // =============================================
+  const GH = 'https://api.github.com';
+
+  function creds() {
+    return {
+      user:  localStorage.getItem('gh_user'),
+      repo:  localStorage.getItem('gh_repo'),
+      token: localStorage.getItem('gh_token'),
+    };
+  }
+
+  function ghHeaders() {
+    return {
+      'Authorization': `token ${creds().token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+    };
+  }
+
+  async function ghGet(path) {
+    const { user, repo } = creds();
+    const r = await fetch(`${GH}/repos/${user}/${repo}/contents/${path}`, { headers: ghHeaders() });
+    if (!r.ok) throw new Error(`GitHub API ${r.status}: ${await r.text()}`);
+    return r.json();
+  }
+
+  async function ghPut(path, message, content, sha) {
+    const { user, repo } = creds();
+    const body = { message, content: btoa(unescape(encodeURIComponent(content))) };
+    if (sha) body.sha = sha;
+    const r = await fetch(`${GH}/repos/${user}/${repo}/contents/${path}`, {
+      method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error(`GitHub API ${r.status}: ${await r.text()}`);
+    return r.json();
+  }
+
+  async function ghDelete(path, message, sha) {
+    const { user, repo } = creds();
+    const r = await fetch(`${GH}/repos/${user}/${repo}/contents/${path}`, {
+      method: 'DELETE',
+      headers: ghHeaders(),
+      body: JSON.stringify({ message, sha })
+    });
+    if (!r.ok) throw new Error(`GitHub API ${r.status}: ${await r.text()}`);
+    return r.json();
+  }
+
+  // =============================================
+  // STATUS BAR
+  // =============================================
+  let statusTimer;
+  function showStatus(msg, type = 'ok', ms = 3000) {
+    const bar = document.getElementById('status-bar');
+    bar.textContent = msg;
+    bar.className = `show ${type}`;
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => bar.className = '', ms);
+  }
+
+  // =============================================
+  // CONFIRM MODAL
+  // =============================================
+  function confirm(title, body) {
+    return new Promise(resolve => {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-body').textContent = body;
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.add('show');
+      const cleanup = (val) => {
+        modal.classList.remove('show');
+        document.getElementById('modal-confirm').onclick = null;
+        document.getElementById('modal-cancel').onclick = null;
+        resolve(val);
+      };
+      document.getElementById('modal-confirm').onclick = () => cleanup(true);
+      document.getElementById('modal-cancel').onclick  = () => cleanup(false);
+    });
+  }
+
+  // =============================================
+  // POST INDEX (posts/index.json)
+  // A JSON file that tracks all posts for the home page.
+  // =============================================
+  async function getIndex() {
+    try {
+      const f = await ghGet('posts/index.json');
+      const data = JSON.parse(decodeURIComponent(escape(atob(f.content.replace(/\n/g,'')))));
+      return { posts: data.posts || [], sha: f.sha };
+    } catch(e) {
+      // file doesn't exist yet
+      return { posts: [], sha: null };
+    }
+  }
+
+  async function saveIndex(posts, sha) {
+    const content = JSON.stringify({ posts }, null, 2);
+    return ghPut('posts/index.json', 'update post index', content, sha);
+  }
+
+  // =============================================
+  // REBUILD index.html from index.json
+  // =============================================
+  async function rebuildHomepage(posts) {
+    // fetch current index.html
+    const f = await ghGet('index.html');
+    let html = decodeURIComponent(escape(atob(f.content.replace(/\n/g,''))));
+
+    // Regenerate the feed section
+    const feedHtml = posts.length === 0
+      ? `        <!-- no posts yet -->`
+      : posts.map(p => `
+        <article class="post-card">
+          <div class="post-meta">
+            <span class="post-date">${p.date}</span>
+            <span class="post-tag">${p.tag}</span>
+          </div>
+          <h2 class="post-title">
+            <a href="posts/${p.slug}.html">${p.title}</a>
+          </h2>
+          <p class="post-excerpt">${p.excerpt}</p>
+          <a href="posts/${p.slug}.html" class="read-more">read more →</a>
+        </article>`).join('\n');
+
+    html = html.replace(
+      /(<section class="feed">)([\s\S]*?)(<\/section>)/,
+      `$1\n${feedHtml}\n\n      $3`
+    );
+
+    await ghPut('index.html', 'rebuild homepage', html, f.sha);
+  }
+
+  // =============================================
+  // LOAD & RENDER POST LIST
+  // =============================================
+  async function loadPosts() {
+    const wrap = document.getElementById('post-list-wrap');
+    wrap.innerHTML = '<div class="empty-state"><span class="spinner"></span> loading...</div>';
+    try {
+      const { posts } = await getIndex();
+      if (!posts.length) {
+        wrap.innerHTML = `<div class="empty-state">no posts yet. <a href="editor.html">write one →</a></div>`;
+        return;
+      }
+      // Sort newest first
+      const sorted = [...posts].sort((a,b) => b.date.localeCompare(a.date));
+      wrap.innerHTML = `<div class="post-list">${sorted.map(p => `
+        <div class="post-row" data-slug="${p.slug}">
+          <div class="post-row-info">
+            <div class="post-row-title">${p.title}</div>
+            <div class="post-row-meta">
+              ${p.date}
+              <span class="tag">${p.tag}</span>
+            </div>
+          </div>
+          <div class="post-row-btns">
+            <a href="editor.html?slug=${encodeURIComponent(p.slug)}" class="btn btn-sm">edit</a>
+            <button class="btn btn-sm btn-danger" data-delete="${p.slug}">delete</button>
+          </div>
+        </div>`).join('')}
+      </div>`;
+
+      // Bind delete buttons
+      wrap.querySelectorAll('[data-delete]').forEach(btn => {
+        btn.addEventListener('click', () => deletePost(btn.dataset.delete));
+      });
+    } catch(e) {
+      wrap.innerHTML = `<div class="empty-state" style="color:#ff6b6b">error: ${e.message}</div>`;
+    }
+  }
+
+  // =============================================
+  // DELETE POST
+  // =============================================
+  async function deletePost(slug) {
+    const ok = await confirm(
+      `delete "${slug}"?`,
+      'This permanently removes the post file and removes it from the homepage. Cannot be undone.'
+    );
+    if (!ok) return;
+
+    showStatus('deleting...', 'ok', 9999);
+    try {
+      // 1. delete the post html file
+      const postFile = await ghGet(`posts/${slug}.html`);
+      await ghDelete(`posts/${slug}.html`, `delete post: ${slug}`, postFile.sha);
+
+      // 2. update index.json
+      const { posts, sha } = await getIndex();
+      const newPosts = posts.filter(p => p.slug !== slug);
+      const saved = await saveIndex(newPosts, sha);
+
+      // 3. rebuild homepage
+      await rebuildHomepage(newPosts);
+
+      showStatus(`"${slug}" deleted`, 'ok');
+      loadPosts();
+    } catch(e) {
+      showStatus(`error: ${e.message}`, 'err', 6000);
+    }
+  }
+
+  // =============================================
+  // AUTH
+  // =============================================
+  async function tryLogin() {
+    const user  = document.getElementById('input-user').value.trim();
+    const repo  = document.getElementById('input-repo').value.trim();
+    const token = document.getElementById('input-token').value.trim();
+    const errEl = document.getElementById('login-error');
+    errEl.style.display = 'none';
+
+    if (!user || !repo || !token) {
+      errEl.textContent = 'all fields are required';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('btn-login');
+    btn.textContent = 'connecting...';
+    btn.disabled = true;
+
+    try {
+      // verify token works
+      const r = await fetch(`${GH}/repos/${user}/${repo}`, {
+        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (!r.ok) throw new Error(r.status === 401 ? 'invalid token' : r.status === 404 ? 'repo not found' : `error ${r.status}`);
+
+      localStorage.setItem('gh_user', user);
+      localStorage.setItem('gh_repo', repo);
+      localStorage.setItem('gh_token', token);
+      showAdmin();
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.style.display = 'block';
+      btn.textContent = 'connect to github →';
+      btn.disabled = false;
+    }
+  }
+
+  function showAdmin() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+    loadPosts();
+  }
+
+  function logout() {
+    localStorage.removeItem('gh_user');
+    localStorage.removeItem('gh_repo');
+    localStorage.removeItem('gh_token');
+    document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'block';
+  }
+
+  // =============================================
+  // INIT
+  // =============================================
+  document.getElementById('btn-login').addEventListener('click', tryLogin);
+  document.getElementById('input-token').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+  document.getElementById('btn-logout').addEventListener('click', logout);
+  document.getElementById('btn-refresh').addEventListener('click', loadPosts);
+
+  // Check if already logged in
+  if (creds().token && creds().user && creds().repo) {
+    showAdmin();
+  } else {
+    document.getElementById('login-screen').style.display = 'block';
+  }
+  </script>
+</body>
+</html>
