@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>about // blog</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div id="radio" class="radio collapsed">
+    <div class="radio-header" id="radio-toggle">
+      <span class="radio-signal">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </span>
+      <span class="radio-label">RADIO</span>
+      <span class="radio-chevron">▲</span>
+    </div>
+    <div class="radio-body">
+      <div class="radio-track-info">
+        <div class="track-name" id="track-name">no signal</div>
+        <div class="track-artist" id="track-artist">---</div>
+      </div>
+      <div class="radio-progress">
+        <div class="progress-bar" id="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-times">
+          <span id="time-current">0:00</span>
+          <span id="time-total">0:00</span>
+        </div>
+      </div>
+      <div class="radio-controls">
+        <button class="ctrl-btn" id="btn-prev">⏮</button>
+        <button class="ctrl-btn ctrl-play" id="btn-play">▶</button>
+        <button class="ctrl-btn" id="btn-next">⏭</button>
+        <button class="ctrl-btn ctrl-vol" id="btn-mute">🔊</button>
+        <input type="range" id="volume" min="0" max="1" step="0.05" value="0.7" class="vol-slider" />
+      </div>
+      <div class="radio-playlist" id="playlist"></div>
+    </div>
+    <audio id="audio-player" preload="metadata"></audio>
+  </div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="site-title">// your_name</a>
+      <nav class="site-nav">
+        <a href="index.html" class="nav-link">posts</a>
+        <a href="about.html" class="nav-link active">about</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="container about-page">
+      <h1>// about</h1>
+      <p>
+        Hey. I'm [your name]. This is my corner of the internet — a blog that runs on
+        plain HTML and whatever I felt like writing that week.
+      </p>
+      <p>
+        I write about [whatever you write about]. Sometimes it's half-formed. That's fine.
+        The point is to think out loud somewhere that isn't a feed.
+      </p>
+      <p>
+        The radio in the bottom corner plays music I like. No algorithm.
+        Just a playlist I curated myself.
+      </p>
+      <p>
+        You can reach me at <a href="mailto:you@example.com">you@example.com</a>
+        or wherever else you find me.
+      </p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>© 2026 your_name</span>
+      <span class="footer-sep">//</span>
+      <span>built with static html & stubbornness</span>
+    </div>
+  </footer>
+
+  <script src="js/radio.js"></script>
+</body>
+</html>

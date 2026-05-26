@@ -1,0 +1,466 @@
+/* =============================================
+   RESET & BASE
+   ============================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:        #0d0d0d;
+  --bg-card:   #141414;
+  --bg-radio:  #111111;
+  --border:    #2a2a2a;
+  --border-hi: #3d3d3d;
+  --text:      #c8c8c8;
+  --text-dim:  #666;
+  --text-hi:   #efefef;
+  --accent:    #7fff7f;      /* terminal green — change to your vibe */
+  --accent-dim:#3a6b3a;
+  --font:      'Courier New', Courier, monospace;
+  --radio-w:   320px;
+  --radius:    2px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+  /* subtle scanline texture */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255,255,255,0.012) 2px,
+    rgba(255,255,255,0.012) 4px
+  );
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+a:hover { opacity: 0.7; }
+
+/* =============================================
+   LAYOUT
+   ============================================= */
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* =============================================
+   HEADER
+   ============================================= */
+.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  background: rgba(13,13,13,0.92);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+}
+.header-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.site-title {
+  color: var(--text-hi);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  font-weight: bold;
+}
+.site-nav { display: flex; gap: 24px; }
+.nav-link {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  transition: color 0.15s;
+}
+.nav-link:hover,
+.nav-link.active { color: var(--accent); opacity: 1; }
+
+/* =============================================
+   MAIN & FEED
+   ============================================= */
+.main {
+  padding: 56px 0 120px;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.post-card {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+.post-card:first-child { border-top: 1px solid var(--border); }
+.post-card:hover { border-color: var(--border-hi); }
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.post-date {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+}
+.post-tag {
+  color: var(--accent-dim);
+  font-size: 0.72rem;
+  border: 1px solid var(--accent-dim);
+  padding: 1px 6px;
+  border-radius: var(--radius);
+  text-transform: lowercase;
+}
+
+.post-title {
+  font-size: 1.15rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+.post-title a {
+  color: var(--text-hi);
+}
+.post-title a:hover { color: var(--accent); opacity: 1; }
+
+.post-excerpt {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+
+.read-more {
+  font-size: 0.82rem;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+
+/* =============================================
+   POST PAGE
+   ============================================= */
+.post-full {
+  padding: 56px 0 120px;
+}
+.post-full-header {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.post-full-title {
+  font-size: 1.6rem;
+  color: var(--text-hi);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+.post-full-body {
+  color: var(--text);
+  line-height: 1.85;
+}
+.post-full-body p { margin-bottom: 1.4em; }
+.post-full-body h2 {
+  color: var(--text-hi);
+  font-size: 1.1rem;
+  margin: 2em 0 0.75em;
+  padding-left: 12px;
+  border-left: 2px solid var(--accent);
+}
+.post-full-body blockquote {
+  border-left: 2px solid var(--border-hi);
+  padding-left: 16px;
+  color: var(--text-dim);
+  font-style: italic;
+  margin: 1.5em 0;
+}
+.post-full-body code {
+  background: var(--bg-card);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  font-size: 0.9em;
+}
+.post-full-body pre {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+.post-full-body pre code {
+  background: none;
+  padding: 0;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 32px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+.back-link:hover { color: var(--accent); opacity: 1; }
+
+/* =============================================
+   ABOUT PAGE
+   ============================================= */
+.about-page { padding: 56px 0 120px; }
+.about-page h1 {
+  font-size: 1.4rem;
+  color: var(--text-hi);
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.about-page p { margin-bottom: 1.3em; color: var(--text); }
+
+/* =============================================
+   FOOTER
+   ============================================= */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+.site-footer .container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.footer-sep { color: var(--border-hi); }
+
+/* =============================================
+   RADIO PLAYER
+   ============================================= */
+.radio {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: var(--radio-w);
+  background: var(--bg-radio);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius);
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  transition: box-shadow 0.2s;
+  overflow: hidden;
+}
+.radio:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.8); }
+
+/* collapsed state */
+.radio.collapsed .radio-body { display: none; }
+.radio.collapsed .radio-chevron { transform: rotate(180deg); }
+
+.radio-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.radio-header:hover { background: rgba(255,255,255,0.03); }
+
+.radio-signal {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+.radio-signal .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+/* animated signal dots when playing */
+.radio.playing .dot:nth-child(1) { animation: pulse 1.2s ease-in-out infinite; }
+.radio.playing .dot:nth-child(2) { animation: pulse 1.2s ease-in-out 0.2s infinite; }
+.radio.playing .dot:nth-child(3) { animation: pulse 1.2s ease-in-out 0.4s infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.8); }
+}
+
+.radio-label {
+  flex: 1;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+}
+.radio-chevron {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  transition: transform 0.2s;
+}
+
+.radio-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radio-track-info { min-height: 36px; }
+.track-name {
+  color: var(--text-hi);
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: bold;
+}
+.track-artist {
+  color: var(--text-dim);
+  font-size: 0.74rem;
+  margin-top: 2px;
+}
+
+.radio-progress {}
+.progress-bar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.5s linear;
+}
+.progress-times {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.radio-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ctrl-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+}
+.ctrl-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.ctrl-play {
+  width: 36px;
+  height: 36px;
+  border-color: var(--border-hi);
+  color: var(--text-hi);
+  font-size: 0.9rem;
+}
+.ctrl-play:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+.ctrl-vol { margin-left: auto; }
+
+.vol-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 70px;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  outline: none;
+}
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.radio-playlist {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  max-height: 140px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.playlist-item {
+  padding: 5px 6px;
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-radius: var(--radius);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  transition: background 0.1s;
+}
+.playlist-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.playlist-item.active { color: var(--accent); }
+.playlist-item .pl-idx {
+  width: 16px;
+  text-align: right;
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+.playlist-item .pl-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* =============================================
+   SCROLLBAR
+   ============================================= */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 480px) {
+  :root { --radio-w: calc(100vw - 32px); }
+  .radio { right: 16px; bottom: 16px; }
+}

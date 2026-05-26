@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hello, world. // blog</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+
+  <div id="radio" class="radio collapsed">
+    <div class="radio-header" id="radio-toggle">
+      <span class="radio-signal">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </span>
+      <span class="radio-label">RADIO</span>
+      <span class="radio-chevron">▲</span>
+    </div>
+    <div class="radio-body">
+      <div class="radio-track-info">
+        <div class="track-name" id="track-name">no signal</div>
+        <div class="track-artist" id="track-artist">---</div>
+      </div>
+      <div class="radio-progress">
+        <div class="progress-bar" id="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-times">
+          <span id="time-current">0:00</span>
+          <span id="time-total">0:00</span>
+        </div>
+      </div>
+      <div class="radio-controls">
+        <button class="ctrl-btn" id="btn-prev">⏮</button>
+        <button class="ctrl-btn ctrl-play" id="btn-play">▶</button>
+        <button class="ctrl-btn" id="btn-next">⏭</button>
+        <button class="ctrl-btn ctrl-vol" id="btn-mute">🔊</button>
+        <input type="range" id="volume" min="0" max="1" step="0.05" value="0.7" class="vol-slider" />
+      </div>
+      <div class="radio-playlist" id="playlist"></div>
+    </div>
+    <audio id="audio-player" preload="metadata"></audio>
+  </div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="../index.html" class="site-title">// your_name</a>
+      <nav class="site-nav">
+        <a href="../index.html" class="nav-link">posts</a>
+        <a href="../about.html" class="nav-link">about</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      <a href="../index.html" class="back-link">← back to posts</a>
+
+      <article class="post-full">
+        <header class="post-full-header">
+          <div class="post-meta">
+            <span class="post-date">2026-05-26</span>
+            <span class="post-tag">thoughts</span>
+          </div>
+          <h1 class="post-full-title">hello, world.</h1>
+        </header>
+
+        <div class="post-full-body">
+          <p>
+            Every blog starts somewhere. This is where mine starts.
+          </p>
+          <p>
+            I've wanted a place to write for a while — somewhere that isn't a social feed,
+            doesn't have an algorithm trying to optimise my attention, and doesn't require me
+            to perform. Just a page. My page. You're reading it.
+          </p>
+
+          <h2>why plain html</h2>
+          <p>
+            I could've used a CMS. I didn't. There's something satisfying about a site that is
+            exactly what it looks like: text files, a stylesheet, and nothing else running
+            behind the scenes. If the internet goes weird in twenty years, these files still work.
+          </p>
+          <p>
+            Also it's fast. Zero JavaScript frameworks. Zero build steps. Just write, save, push.
+          </p>
+
+          <blockquote>
+            The best tool is usually the simplest one that does the job.
+          </blockquote>
+
+          <p>
+            Anyway — more soon. I have a lot of half-formed thoughts queued up.
+          </p>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>© 2026 your_name</span>
+      <span class="footer-sep">//</span>
+      <span>built with static html & stubbornness</span>
+    </div>
+  </footer>
+
+  <script src="../js/radio.js"></script>
+</body>
+</html>
