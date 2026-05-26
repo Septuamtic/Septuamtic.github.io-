@@ -13,20 +13,10 @@
  */
 
 const PLAYLIST = [
-  // { src: "music/track1.mp3", title: "Track Name", artist: "Artist" },
-  // { src: "music/track2.mp3", title: "Another Track", artist: "Artist" },
-
-  // ---- DEMO: uses a freely-licensed public domain piece ----
-  // Delete these and add your own files!
   {
-    src: "https://upload.wikimedia.org/wikipedia/commons/4/4e/BWV_543_fugue.ogg",
-    title: "Fugue in A minor BWV 543",
-    artist: "J.S. Bach (public domain)"
-  },
-  {
-    src: "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_-_In_the_Hall_of_the_Mountain_King.ogg",
-    title: "In the Hall of the Mountain King",
-    artist: "E. Grieg (public domain)"
+    src: "music/1_-_Kolhigandu_(2013)_DVDRip_x264-DhiRLS.mp4",
+    title: "Kolhigandu",
+    artist: "Unknown"
   },
 ];
 
